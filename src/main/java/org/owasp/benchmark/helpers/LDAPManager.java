@@ -34,7 +34,7 @@ import org.owasp.esapi.Encoder;
 import org.owasp.esapi.reference.DefaultEncoder;
 
 /**
- * A simple example exposing how to embed Apache Directory Server version 1.5.7 into an application.
+ * A simple example exposing how to embed Apache Directory Server into an application.
  *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  * @version $Rev$, $Date$
@@ -48,13 +48,18 @@ public class LDAPManager {
         try {
             ctx = getDirContext();
         } catch (NamingException e) {
+            // FIXME: Don't eat exceptions!
             System.out.println("Failed to get Directory Context: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     protected Hashtable<Object, Object> createEnv() {
         Hashtable<Object, Object> env = new Hashtable<Object, Object>();
         env.put(Context.PROVIDER_URL, "ldap://localhost:10389");
+        env.put(Context.SECURITY_AUTHENTICATION, "simple");
+        env.put(Context.SECURITY_PRINCIPAL, "uid=admin,ou=system");
+        env.put(Context.SECURITY_CREDENTIALS, "secret");
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         return env;
     }
@@ -107,19 +112,20 @@ public class LDAPManager {
 
             NamingEnumeration<SearchResult> results = ctx.search(base, filter, sc);
 
+            boolean foundUser = results.hasMore();
+
             while (results.hasMore()) {
                 SearchResult sr = (SearchResult) results.next();
                 Attributes attrs = sr.getAttributes();
 
                 Attribute attr = attrs.get("uid");
                 if (attr != null) {
-                    // logger.debug("record found " + attr.get());
                     // System.out.println("record found " + attr.get());
                 }
             }
             ctx.close();
 
-            return true;
+            return foundUser;
         } catch (Exception e) {
             System.out.println("LDAP error search: ");
             e.printStackTrace();

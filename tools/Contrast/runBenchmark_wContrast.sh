@@ -16,7 +16,7 @@ if $(find contrast.jar -mmin +1440); then
   echo "Using Contrast agent downloaded in past day"
 else
   echo "Fetching the latest Contrast agent"
-  export VERSION=$(echo "$(curl --fail --silent "https://search.maven.org/solrsearch/select?q=g:"com.contrastsecurity"&a:"contrast-agent"&rows=20&wt=json" | jq -r '.response.docs[0].latestVersion')") && Curl --silent https://repo1.maven.org/maven2/com/contrastsecurity/contrast-agent/${VERSION}/contrast-agent-${VERSION}.jar -o contrast.jar
+  export VERSION=$(echo "$(curl --fail --silent "https://search.maven.org/solrsearch/select?q=g:"com.contrastsecurity"&a:"contrast-agent"&rows=20&wt=json" | jq -r '.response.docs[0].latestVersion')") && curl --silent https://repo1.maven.org/maven2/com/contrastsecurity/contrast-agent/${VERSION}/contrast-agent-${VERSION}.jar -o contrast.jar
 fi
 
 if [ -d ./working ]; then
@@ -30,7 +30,7 @@ fi
 echo
 echo "Starting Benchmark application server with Contrast agent"
 echo "  1. Verify that the output shows \"Starting JVM\"."
-echo "  2. If the output contains \"Continuing without Contrast...\" the credentials in contrast.yaml are most likely incorrect or missing."
+echo "  2. If the output contains \"Contrast not enabled. Check log for details -\" the credentials in contrast.yaml are most likely incorrect or missing."
 echo "  3. Once the Benchmark server is fully started, open another terminal window and run the runCrawler.sh script from the Benchmark root directory."
 echo "  4. When the crawler finishes (takes a minute or two), hit CTRL+C in this window to stop the server and write the Contrast results to the /results folder."
 echo
